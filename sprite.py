@@ -1,6 +1,7 @@
 import pygame as pg
 from pygame.sprite import Sprite
 from settings import *
+from utils import Spritesheet
 
 from os import path 
 
@@ -40,12 +41,20 @@ class player (Sprite):
         self.groups = game.all_sprites
         Sprite.__init__(self, self.groups)
         self.game = game
+        self.spritesheet = Spritesheet(path.join(self.game.img_dir, "sprite_sheet.png"))
+        self.load_images()
         self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.image = self.spritesheet.get_image(0,0,TILESIZE,TILESIZE) 
+        self.image.set_colorkey(BLACK)
         self.image.fill(WHITE)
         self.rect = self.image.get_rect()
         self.hit_rect = PLAYER_HIT_RECT
         self.vel = vec(0,0)
         self.pos = vec(x*TILESIZE,y*TILESIZE)
+        self.last_update = 0 
+        self.current_frame = 0
+        self.dir = "none"
+
         print("player initialized")
 
     def get_keys(self):
@@ -68,8 +77,30 @@ class player (Sprite):
             #self.vel.normalize()
             self.vel *= 0.7071
 
+    def animate(self):
+        # use the time element to get now
+        now = pg.time.get_ticks()
+        if self.dir == "none":
+            if now - self.last_update > 350:
+                self.last_update = now
+                self.current_frame = (self.current_frame + 1) % len(self.idle_frames)
+                bottom = self.rect.bottom
+                self.image = self.idle_frames[self.current_frame]
+                self.image.set_colorkey(BLACK)
+                self.rect = self.image.get_rect()
+                self.rect.bottom = bottom
+        elif self.dir == "right":
+            pass
+
+    def load_images(self):
+        self.idle_frames = [self.spritesheet.get_image(0,0,TILESIZE, TILESIZE),
+                            self.spritesheet.get_image(TILESIZE,0,TILESIZE, TILESIZE)
+                            ]
+        
+
     def update(self):
         self.get_keys()
+        self.animate()
         self.rect.center = self.pos
         self.pos += self.vel * self.game.dt
         self.hit_rect.centerx = self.pos.x
@@ -91,7 +122,7 @@ class Wall (Sprite):
         self.x = x*TILESIZE
         self.y = y*TILESIZE
         self.rect.x = self.x 
-        self.rect.y = self.y 
+        self.rect.y = self.y
         print("wall initialized")
 
 class Mob (Sprite):
@@ -99,7 +130,11 @@ class Mob (Sprite):
         self.groups = game.all_sprites, game.all_mobs
         Sprite.__init__(self, self.groups)
         self.game = game
+        self.spritesheet = Spritesheet(path.join(self.game.img_dir, "sprite_sheet.png"))
+        self.load_images()
         self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.image = self.spritesheet.get_image(0,0,TILESIZE,TILESIZE) 
+        self.image.set_colorkey(BLACK)
         self.image.fill(RED)
         self.rect = self.image.get_rect()
         self.speed = 1
@@ -108,8 +143,32 @@ class Mob (Sprite):
         self.y = y*TILESIZE
         self.rect.x = self.x
         self.rect.y = self.y
+        self.last_update = 0 
+        self.current_frame = 0
+        self.dir = "none"
         
+
+    def animate(self):
+         # use the time element to get now
+        now = pg.time.get_ticks()
+        if self.dir == "none":
+            if now - self.last_update > 350:
+                self.last_update = now
+                self.current_frame = (self.current_frame + 1) % len(self.idle_frames)
+                bottom = self.rect.bottom
+                self.image = self.idle_frames[self.current_frame]
+                self.image.set_colorkey(BLACK)
+                self.rect = self.image.get_rect()
+                self.rect.bottom = bottom
+        elif self.dir == "right":
+            pass
+
+    def load_images(self):
+        self.idle_frames = [self.spritesheet.get_image(2*TILESIZE,0,2* TILESIZE, TILESIZE),
+                            self.spritesheet.get_image(2* TILESIZE,0,2 *TILESIZE, TILESIZE)
+                            ]
     def update(self):
+        self.animate()
         if self.rect.x>WIDTH or self.rect.x<0:
             #print("i've broken out")
             self.speed*= -1 
@@ -118,4 +177,3 @@ class Mob (Sprite):
         self.rect.x = self.x
         self.y += self.vy * self.game.dt *self.speed
         self.rect.y = self.y
-    

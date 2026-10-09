@@ -17,6 +17,15 @@
 
 #Output: Graphics, sound, haptics (vibration of the controller)
 
+#CSGO
+#GOALS: kill eveyone not on your team, last one standing, Plant or Defuse Bombs
+
+#RULES: 
+
+#FEEDBACK
+
+#FREEDOM
+
 ''''''
 
 import pygame as pg 
@@ -26,7 +35,7 @@ from sprite import*
 from utils import * 
 
 class Game: #defining the class game
-    def __init__(self): #code to display the screen
+    def __init__(self): #runs first and are the processors of the class game
           pg.init()
           pg.mixer.init()
           self.screen = pg.display.set_mode((WIDTH , HEIGHT))
@@ -35,14 +44,15 @@ class Game: #defining the class game
           self.running = True
           self.playing = True
           self.clock = pg.time.Clock()
-    def load_data(self,map):
+
+    def load_data(self,map): #makes images, sounds, and text available
         self.game_dir = path.dirname(__file__)
         self.img_dir = path.join(self.game_dir, 'images')
         self.snd_dir = path.join(self.game_dir, 'audio')
         self.map = Map(path.join(self.game_dir, map))
 
-    def new(self): #adding and positioning the sprite
-        self.load_data('level1.txt')
+    def new(self): # instantiating sprite groups (adding and positioning the sprites)
+        self.load_data('level1.txt') #also sets up tilemap 
         print(self.map.data)
         self.all_sprites = pg.sprite.Group()
         self.all_walls = pg.sprite.Group()
@@ -65,7 +75,7 @@ class Game: #defining the class game
                 if tile == 'P':
                     player(self, col, row)
 
-    def run(self): 
+    def run(self): #CORE of the game loop 
         self.playing= True
         while self.playing:
             self.dt = self.clock.tick(FPS)/ 1000
@@ -73,24 +83,34 @@ class Game: #defining the class game
             self.update()
             self.draw()
 
-    def events(self): 
+    def events(self): #handles all the user input
          for event in pg.event.get():
             if event.type == pg.QUIT:
                 if self.playing:
                     self.playing =False
                 self.running = False
+    def draw_text(self, text, size, color, x,y):
+        font_name = pg.font.match_font('arial')
+        font = pg.font.Font(font_name, size)
+        text_surface = font.render(text, True, color)
+        text_rect = text_surface.get_rect()
+        text_rect.midtop = (x,y)
+        self.screen.blit(text_surface, text_rect)
 
     def update(self):
        self.all_sprites.update()
        
     def draw(self):
+        #The order matters: The bottom layers of the game are the ones that need to be drawn first
+        #Last(text) should be on top of everything
         self.screen.fill(BGCOLOR)
         self.all_sprites.draw(self.screen)
+        self.draw_text("Frames per second: " +str(floor(1/self.dt) ), 24, WHITE, WIDTH/2, HEIGHT/4)
         pg.display.flip()
 
 
 if __name__=="__main__":
-    g= Game() #Called for the game class
+    g= Game() #instantiated the Game Class (Called for the game class
 
 while g.running:
     g.new() 
