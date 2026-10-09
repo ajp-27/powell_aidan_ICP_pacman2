@@ -135,16 +135,19 @@ class Mob (Sprite):
         self.image = pg.Surface((TILESIZE, TILESIZE))
         self.image = self.spritesheet.get_image(0,0,TILESIZE,TILESIZE) 
         self.image.set_colorkey(BLACK)
-        self.image.fill(RED)
+        self.image = self.spritesheet.get_image(0,0,TILESIZE, TILESIZE)
+        # self.image.fill(RED)
         self.rect = self.image.get_rect()
-        self.speed = 1
-        self.vx,self.vy = 500,0
+        self.speed = 100
+        self.vel = vec(0,0)
+        self.pos = vec(x*TILESIZE, y*TILESIZE)
         self.x = x*TILESIZE
         self.y = y*TILESIZE
         self.rect.x = self.x
         self.rect.y = self.y
         self.last_update = 0 
         self.current_frame = 0
+        self.hit_rect = MOB_HIT_RECT
         self.dir = "none"
         
 
@@ -164,16 +167,36 @@ class Mob (Sprite):
             pass
 
     def load_images(self):
-        self.idle_frames = [self.spritesheet.get_image(2*TILESIZE,0,2* TILESIZE, TILESIZE),
-                            self.spritesheet.get_image(2* TILESIZE,0,2 *TILESIZE, TILESIZE)
-                            ]
+        self.idle_frames = [self.spritesheet.get_image(64,0,TILESIZE, TILESIZE),
+                                self.spritesheet.get_image(96,0,TILESIZE, TILESIZE)
+                                ]
+        self.run_frames = [self.spritesheet.get_image(0,0,TILESIZE, TILESIZE),
+                                self.spritesheet.get_image(TILESIZE,0,TILESIZE, TILESIZE)
+                                ]   
+    def chase(self, obj):
+        if self.pos.x < obj.pos.x:
+            self.vel.x = self.speed
+            self.dir = "right"
+        elif self.pos.x > obj.pos.x:
+            self.vel.x = -self.speed
+            self.dir = "left"
+        else:
+            self.vel.x = 0
+
+        if self.pos.y < obj.pos.y:
+            self.vel.y = self.speed
+        elif self.pos.y > obj.pos.y:
+            self.vel.y = -self.speed
+        else:
+            self.vel.y = 0
     def update(self):
         self.animate()
-        if self.rect.x>WIDTH or self.rect.x<0:
-            #print("i've broken out")
-            self.speed*= -1 
-            self.y += TILESIZE
-        self.x += self.vx * self.game.dt *self.speed
-        self.rect.x = self.x
-        self.y += self.vy * self.game.dt *self.speed
-        self.rect.y = self.y
+        if self.game.player:
+            self.chase(self.game.player)
+        self.rect.center = self.pos
+        self.pos += self.vel * self.game.dt
+        self.hit_rect.centerx = self.pos.x
+        collide_with_walls(self, self.game.all_walls, 'x')
+        self.hit_rect.centery = self.pos.y
+        collide_with_walls(self, self.game.all_walls, 'y')
+        self.rect.center = self.hit_rect.center

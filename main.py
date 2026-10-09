@@ -69,11 +69,11 @@ class Game: #defining the class game
                 if tile == '1':
                     Wall(self, col, row)
                 if tile == 'M':
-                    pass
+                    Mob(self, col, row)
         for row, tiles in enumerate(self.map.data):
             for col, tile, in enumerate(tiles):
                 if tile == 'P':
-                    player(self, col, row)
+                    self.player = player(self,col, row)
 
     def run(self): #CORE of the game loop 
         self.playing= True
@@ -89,6 +89,7 @@ class Game: #defining the class game
                 if self.playing:
                     self.playing =False
                 self.running = False
+            
     def draw_text(self, text, size, color, x,y):
         font_name = pg.font.match_font('arial')
         font = pg.font.Font(font_name, size)
