@@ -2,6 +2,7 @@ import pygame as pg
 from pygame.sprite import Sprite
 from settings import *
 from utils import Spritesheet
+from utils import coin
 
 from os import path 
 
@@ -53,6 +54,7 @@ class player (Sprite):
         self.pos = vec(x*TILESIZE,y*TILESIZE)
         self.last_update = 0 
         self.current_frame = 0
+        self.coins = 0
         self.dir = "none"
 
         print("player initialized")
@@ -103,6 +105,10 @@ class player (Sprite):
         self.animate()
         self.rect.center = self.pos
         self.pos += self.vel * self.game.dt
+        hits = pg.sprite.spritecollide(self, self.game.all_coins, True)
+        if hits:
+            self.coins += 1
+            self.game.score += 1
         self.hit_rect.centerx = self.pos.x
         collide_with_walls(self,self.game.all_walls, 'x')
         self.hit_rect.centery = self.pos.y
@@ -125,6 +131,21 @@ class Wall (Sprite):
         self.rect.y = self.y
         print("wall initialized")
 
+class Coin(Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.all_sprites, game.all_coins
+        Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE, TILESIZE))
+        pg.draw.circle(self.image, GOLD, (TILESIZE/2, TILESIZE/2), TILESIZE/2)
+        # pg.draw.ellipse(self.image, GOLD, (TILESIZE/2, TILESIZE/2), TILESIZE/2)
+        self.image.set_colorkey(BLACK)
+        # self.image.fill(GOLD)
+        self.rect = self.image.get_rect()
+        self.vel = vec(0,0) 
+        self.pos = vec(x,y) * TILESIZE
+        self.rect.center = self.pos
+        
 class Mob (Sprite):
     def __init__(self,game,x,y):
         self.groups = game.all_sprites, game.all_mobs
@@ -173,6 +194,7 @@ class Mob (Sprite):
         self.run_frames = [self.spritesheet.get_image(0,0,TILESIZE, TILESIZE),
                                 self.spritesheet.get_image(TILESIZE,0,TILESIZE, TILESIZE)
                                 ]   
+    #uses autpcomplete by creating a chase method using pos vectors and obj as a parameter
     def chase(self, obj):
         if self.pos.x < obj.pos.x:
             self.vel.x = self.speed
@@ -189,6 +211,7 @@ class Mob (Sprite):
             self.vel.y = -self.speed
         else:
             self.vel.y = 0
+
     def update(self):
         self.animate()
         if self.game.player:

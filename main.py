@@ -44,12 +44,31 @@ class Game: #defining the class game
           self.running = True
           self.playing = True
           self.clock = pg.time.Clock()
+          self.score = 0
+          self.highscore = 0
+
 
     def load_data(self,map): #makes images, sounds, and text available
         self.game_dir = path.dirname(__file__)
+        self.game_save_dir = path.join(self.game_dir,"highscore.txt")
         self.img_dir = path.join(self.game_dir, 'images')
         self.snd_dir = path.join(self.game_dir, 'audio')
         self.map = Map(path.join(self.game_dir, map))
+
+        try:
+            with open(self.game_save_dir, "x", encoding="utf-8") as file:
+                file.write("Hello, World!")
+            print("File created successfully.")
+        except FileExistsError:
+            print("File already exists. No action taken.")
+        
+        with open(self.game_save_dir, 'r') as f:
+            try:
+                self.highscore = int(f.read())
+                print('high score set')
+            except:
+                self.highscore = 0
+                print("high score is zero")
 
     def new(self): # instantiating sprite groups (adding and positioning the sprites)
         self.load_data('level1.txt') #also sets up tilemap 
@@ -57,9 +76,10 @@ class Game: #defining the class game
         self.all_sprites = pg.sprite.Group()
         self.all_walls = pg.sprite.Group()
         self.all_mobs = pg.sprite.Group()
-        #self.player = player(self,WIDTH/2, HEIGHT/2)
+        self.all_coins = pg.sprite.Group()
         self.wall = Wall(self,2,0)
         self.mob = Mob(self,5,0)
+        self.coin = Coin(self,2,0)
         print(type(self.all_sprites))
         # self.all_sprites.add(self.player)
         # self.all_sprites.add(self.walls)
@@ -70,6 +90,8 @@ class Game: #defining the class game
                     Wall(self, col, row)
                 if tile == 'M':
                     Mob(self, col, row)
+                if tile == 'C':
+                    Coin(self,col,row)
         for row, tiles in enumerate(self.map.data):
             for col, tile, in enumerate(tiles):
                 if tile == 'P':
@@ -86,6 +108,8 @@ class Game: #defining the class game
     def events(self): #handles all the user input
          for event in pg.event.get():
             if event.type == pg.QUIT:
+                with open(path.join(self.game_dir, self.game_save_dir), 'w') as f:
+                    f.write(str(self.score))
                 if self.playing:
                     self.playing =False
                 self.running = False
@@ -107,6 +131,7 @@ class Game: #defining the class game
         self.screen.fill(BGCOLOR)
         self.all_sprites.draw(self.screen)
         self.draw_text("Frames per second: " +str(floor(1/self.dt) ), 24, WHITE, WIDTH/2, HEIGHT/4)
+        self.draw_text(f"Coins:{self.player.coins} ", 24, WHITE, WIDTH/2, HEIGHT/9)
         pg.display.flip()
 
 
