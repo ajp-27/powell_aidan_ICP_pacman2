@@ -52,7 +52,11 @@ class Game: #defining the class game
         self.game_dir = path.dirname(__file__)
         self.game_save_dir = path.join(self.game_dir,"highscore.txt")
         self.img_dir = path.join(self.game_dir, 'images')
+#soud 
         self.snd_dir = path.join(self.game_dir, 'audio')
+        self.pickup_snd = pg.mixer.Sound(path.join(self.snd_dir, "pickup.wav"))
+
+
         self.map = Map(path.join(self.game_dir, map))
 
         try:
@@ -96,6 +100,8 @@ class Game: #defining the class game
             for col, tile, in enumerate(tiles):
                 if tile == 'P':
                     self.player = player(self,col, row)
+        pg.mixer.music.load(path.join(self.snd_dir, "audio_Juhani Junkala_Stage 1.ogg"))
+        pg.mixer.music.play(loops=-1)
 
     def run(self): #CORE of the game loop 
         self.playing= True
@@ -136,7 +142,7 @@ class Game: #defining the class game
 
 
 if __name__=="__main__":
-    g= Game() #instantiated the Game Class (Called for the game class
+    g= Game() #instantiated the Game Class (Called for the game class)
 
 while g.running:
     g.new() 
