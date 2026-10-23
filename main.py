@@ -48,9 +48,9 @@ class Game: #defining the class game
           self.highscore = 0
 
 
-    def load_data(self,map): #makes images, sounds, and text available
+    def load_data(self,map): #makes images, sounds, text, file handling available
         self.game_dir = path.dirname(__file__)
-        self.game_save_dir = path.join(self.game_dir,"highscore.txt")
+        self.game_save_file = path.join(self.game_dir, "highscore.txt")
         self.img_dir = path.join(self.game_dir, 'images')
 #soud 
         self.snd_dir = path.join(self.game_dir, 'audio')
@@ -59,23 +59,25 @@ class Game: #defining the class game
 
         self.map = Map(path.join(self.game_dir, map))
 
-        try:
-            with open(self.game_save_dir, "x", encoding="utf-8") as file:
+        
+        try: 
+            with open(self.game_save_file, "x", encoding="utf-8") as file:
                 file.write("Hello, World!")
             print("File created successfully.")
+
         except FileExistsError:
-            print("File already exists. No action taken.")
+            print("File already exists")
         
-        with open(self.game_save_dir, 'r') as f:
+        with open(self.game_save_file, 'r') as file:
             try:
-                self.highscore = int(f.read())
+                self.highscore = int(file.read())
                 print('high score set')
             except:
                 self.highscore = 0
-                print("high score is zero")
+                print("high score not read")
 
     def new(self): # instantiating sprite groups (adding and positioning the sprites)
-        self.load_data('level1.txt') #also sets up tilemap 
+        self.load_data('level1.txt') #also sets up tilemap and sound track
         print(self.map.data)
         self.all_sprites = pg.sprite.Group()
         self.all_walls = pg.sprite.Group()
@@ -110,17 +112,21 @@ class Game: #defining the class game
             self.events()
             self.update()
             self.draw()
+    
 
     def events(self): #handles all the user input
          for event in pg.event.get():
             if event.type == pg.QUIT:
-                with open(path.join(self.game_dir, self.game_save_dir), 'w') as f:
-                    f.write(str(self.score))
+                #file handling through writing, reading, appending, etc.  
+                if self.score > self.highscore:
+                    with open(path.join(self.game_dir, self.game_save_file), 'w') as f:
+                        f.write(str(self.score))
                 if self.playing:
                     self.playing =False
                 self.running = False
+                
             
-    def draw_text(self, text, size, color, x,y):
+    def draw_text(self, text, size, color, x,y): #handles text to the game 
         font_name = pg.font.match_font('arial')
         font = pg.font.Font(font_name, size)
         text_surface = font.render(text, True, color)
@@ -131,13 +137,15 @@ class Game: #defining the class game
     def update(self):
        self.all_sprites.update()
        
-    def draw(self):
+    def draw(self): #writes in text in the game
         #The order matters: The bottom layers of the game are the ones that need to be drawn first
         #Last(text) should be on top of everything
         self.screen.fill(BGCOLOR)
         self.all_sprites.draw(self.screen)
         self.draw_text("Frames per second: " +str(floor(1/self.dt) ), 24, WHITE, WIDTH/2, HEIGHT/4)
         self.draw_text(f"Coins:{self.player.coins} ", 24, WHITE, WIDTH/2, HEIGHT/9)
+        self.draw_text(f"Score:{self.score}", 34, WHITE, WIDTH/2, HEIGHT/8)
+        self.draw_text(f"High Score:{self.highscore}", 24, WHITE, WIDTH/2, HEIGHT/12)
         pg.display.flip()
 
 
