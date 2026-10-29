@@ -52,9 +52,11 @@ class player (Sprite): #creating the class player
         self.rect = self.image.get_rect()
         self.hit_rect = PLAYER_HIT_RECT
         self.vel = vec(0,0)
+        self.acc = vec(0,0)
         self.pos = vec(x*TILESIZE,y*TILESIZE)
         self.last_update = 0 
         self.current_frame = 0
+        self.jumping = False
         self.coins = 0
         self.dir = "none"
 
@@ -65,20 +67,25 @@ class player (Sprite): #creating the class player
         # listen for events specific to keys
         #change velocity based on which key is pressed
        
-        self.vel = vec(0,0)
+        #self.vel = vec(0,0)
+        self.dir ='none'
         keys = pg.key.get_pressed()
         if keys[pg.K_LEFT] or keys[pg.K_a]:
-            self.vel.x = -PLAYER_SPEED
+            #self.vel.x = -PLAYER_SPEED
+            self.acc.x = -PLAYER_SPEED
         if keys[pg.K_RIGHT] or keys[pg.K_d]:
-            self.vel.x = PLAYER_SPEED
+            #self.vel.x = PLAYER_SPEED
+            self.acc.x = PLAYER_SPEED
         if keys[pg.K_DOWN] or keys[pg.K_s]:
-            self.vel.y = PLAYER_SPEED
+            #self.vel.y = PLAYER_SPEED
+            self.acc.y = PLAYER_SPEED
         if keys[pg.K_UP] or keys[pg.K_w]:
-            self.vel.y = -PLAYER_SPEED
+            #self.vel.y = -PLAYER_SPEED
+            self.acc.y = -PLAYER_SPEED
         #check to see if player is moving diagonal 
-        if self.vel.x != 0 and self.vel.y !=0:
-            #self.vel.normalize()
-            self.vel *= 0.7071
+        # if self.vel.x != 0 and self.vel.y !=0:
+        #     #self.vel.normalize()
+        #     self.vel *= 0.7071
 
     def animate(self): #animates the sprite player
         # use the time element to get now
@@ -102,17 +109,20 @@ class player (Sprite): #creating the class player
         
 
     def update(self): #updates all attributes of player
+        self.acc= vec(0,2)
         self.get_keys()
         self.animate()
+        self.acc.x += self.vel.x * PLAYER_FRICTION
+        self.acc.y += self.vel.y * PLAYER_FRICTION
         self.rect.center = self.pos
-        self.pos += self.vel * self.game.dt
+        self.pos += self.vel +0.5 * self.acc
         hits = pg.sprite.spritecollide(self, self.game.all_coins, True)
         if hits:
-            for i in range(10):
+            for i in range(25):
                 Particle(self.game, hits[0].pos.x, hits[0].pos.y)
             self.coins += 1
-            self.game.score += 1
             self.game.pickup_snd.play()
+            self.game.score += 1
         self.hit_rect.centerx = self.pos.x
         collide_with_walls(self,self.game.all_walls, 'x')
         self.hit_rect.centery = self.pos.y
@@ -145,18 +155,18 @@ class Particle (Sprite): #defines the class particles
         self.rect = self.image.get_rect()
         self.vel=vec(randint(-180,180), randint(-180,180))
         self.pos = vec(x,y)
-        self.speed = randint(1,3)
-        self.countdown = Cooldown()
+        self.speed = 5 #randint(1,3)
+        self.countdown = Timer()
         self.countdown.event_time = floor(pg.time.get_ticks()/1000)
         print(self.pos.x)
         print(self.pos.y)
         print(str(len(self.game.all_particles)))
 
-    def update(self):
+    def update(self): 
         self.countdown.ticking()
 
         self.pos += self.vel * self.speed * self.game.dt
-        if self.countdown.delta > 1:
+        if self.countdown.get_delta() > 2:
             self.kill()
             print("im dead")
 

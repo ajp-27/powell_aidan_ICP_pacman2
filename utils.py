@@ -26,7 +26,7 @@ class Spritesheet:
         image = new_image
         return image
 
-class coin:
+class coin: 
     def __init__(self, filename): #initializing the image into the game
         self.coin = pg.image.load(filename).convert()
 
@@ -37,13 +37,17 @@ class coin:
         image = new_image
         return image
 
-class Cooldown: #function as the 
+class Timer: #function as the time particles appear on screen
     def __int__(self):
-        self.event_time = 0
-        self.current_time = 0
-        self.delta = 0
-    def ticking(self):
-        self.current_time = floor((pg.time.get_ticks())/1000)
-        self.delta = self.current_time - self.event_time
-    def start(self):
-        self.start_time = pg.time.get_ticks()
+        self.event_time = floor((pg.time.get_ticks())/1000)
+    def get_delta(self):
+        return floor((pg.time.get_ticks())/1000) - self.event_time
+    
+    #     self.current_time = 0
+    #     self.delta = 0
+    # def ticking(self):
+    #     self.current_time = floor((pg.time.get_ticks())/1000)
+    #     self.delta = self.current_time - self.event_time
+    # def start(self):
+    #     self.start_time = pg.time.get_ticks()
+    

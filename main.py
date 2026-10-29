@@ -28,10 +28,10 @@
 
 ''''''
 
-import pygame as pg 
+import pygame as pg       #changes the name pygame to pg
 from os import path       #import the pygame into the code
 from settings import *    #have the other blocks of code be imported here so we can use them
-from sprite import* 
+from sprite import*       #imports code from sprite and utils into main
 from utils import * 
 
 class Game: #defining the class game
