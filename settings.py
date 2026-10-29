@@ -1,10 +1,10 @@
 import pygame as pg
 
-WIDTH = 1024
-HEIGHT = 768
+WIDTH = 1024 #screen width
+HEIGHT = 768 #screen height
 TITLE = "BEst Game Ever!!!!"
-TILESIZE = 32
-FPS = 30
+TILESIZE = 32 #Pixel length
+FPS = 30 #number of frames per second
 
 #colors
 BGCOLOR = (255,100,100)

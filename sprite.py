@@ -1,20 +1,21 @@
 import pygame as pg
 from pygame.sprite import Sprite
 from settings import *
-from utils import Spritesheet
-from utils import coin
+from utils import *
+
+from random import randint
 
 from os import path 
 
 vec = pg.math.Vector2
 
-def collide_hit_rect(one, two):
+def collide_hit_rect(one, two): #def what will happen if the player comes into contact with an object
     return one.hit_rect.colliderect(two.rect)
 
-def collide_with_walls(sprite, group, dir):
+def collide_with_walls(sprite, group, dir): #defines what happens when player comes into contact with the walls
     #check for x collision
     if dir =='x':
-        #check if we collided with hit rects
+        #checks if we collided with hit rects
         hits = pg.sprite.spritecollide(sprite,group, False, collide_hit_rect)
         if hits: 
             #this line checks to see if we're to the the left of the wall
@@ -37,7 +38,7 @@ def collide_with_walls(sprite, group, dir):
             sprite.vel.y = 0
             sprite.hit_rect.centery = sprite.pos.y
            
-class player (Sprite):
+class player (Sprite): #creating the class player
     def __init__(self, game, x,y):
         self.groups = game.all_sprites
         Sprite.__init__(self, self.groups)
@@ -79,7 +80,7 @@ class player (Sprite):
             #self.vel.normalize()
             self.vel *= 0.7071
 
-    def animate(self):
+    def animate(self): #animates the sprite player
         # use the time element to get now
         now = pg.time.get_ticks()
         if self.dir == "none":
@@ -94,19 +95,21 @@ class player (Sprite):
         elif self.dir == "right":
             pass
 
-    def load_images(self):
+    def load_images(self): #moves from one image of player to another image of the player continuously
         self.idle_frames = [self.spritesheet.get_image(0,0,TILESIZE, TILESIZE),
                             self.spritesheet.get_image(TILESIZE,0,TILESIZE, TILESIZE)
                             ]
         
 
-    def update(self):
+    def update(self): #updates all attributes of player
         self.get_keys()
         self.animate()
         self.rect.center = self.pos
         self.pos += self.vel * self.game.dt
         hits = pg.sprite.spritecollide(self, self.game.all_coins, True)
         if hits:
+            for i in range(10):
+                Particle(self.game, hits[0].pos.x, hits[0].pos.y)
             self.coins += 1
             self.game.score += 1
             self.game.pickup_snd.play()
@@ -117,7 +120,7 @@ class player (Sprite):
         self.rect.center = self.hit_rect.center
 
 
-class Wall (Sprite):
+class Wall (Sprite): #defines class wall
     def __init__(self,game,x,y):
         self.groups = game.all_sprites, game.all_walls
         Sprite.__init__(self, self.groups)
@@ -132,7 +135,35 @@ class Wall (Sprite):
         self.rect.y = self.y
         print("wall initialized")
 
-class Coin(Sprite):
+class Particle (Sprite): #defines the class particles
+    def __init__(self,game,x,y):
+        self.groups = game.all_sprites, game.all_particles
+        Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE/8, TILESIZE/8))
+        self.image.fill(WHITE)
+        self.rect = self.image.get_rect()
+        self.vel=vec(randint(-180,180), randint(-180,180))
+        self.pos = vec(x,y)
+        self.speed = randint(1,3)
+        self.countdown = Cooldown()
+        self.countdown.event_time = floor(pg.time.get_ticks()/1000)
+        print(self.pos.x)
+        print(self.pos.y)
+        print(str(len(self.game.all_particles)))
+
+    def update(self):
+        self.countdown.ticking()
+
+        self.pos += self.vel * self.speed * self.game.dt
+        if self.countdown.delta > 1:
+            self.kill()
+            print("im dead")
+
+        self.rect.x = self.pos.x
+        self.rect.y = self.pos.y
+
+class Coin(Sprite): #defines coin collectable
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.all_coins
         Sprite.__init__(self, self.groups)
@@ -147,7 +178,7 @@ class Coin(Sprite):
         self.pos = vec(x,y) * TILESIZE
         self.rect.center = self.pos
         
-class Mob (Sprite):
+class Mob (Sprite): #defines mob sprite
     def __init__(self,game,x,y):
         self.groups = game.all_sprites, game.all_mobs
         Sprite.__init__(self, self.groups)
@@ -173,7 +204,7 @@ class Mob (Sprite):
         self.dir = "none"
         
 
-    def animate(self):
+    def animate(self): #animating mob
          # use the time element to get now
         now = pg.time.get_ticks()
         if self.dir == "none":
@@ -188,7 +219,7 @@ class Mob (Sprite):
         elif self.dir == "right":
             pass
 
-    def load_images(self):
+    def load_images(self): #move mob sprite from one image of spritesheet to the next
         self.idle_frames = [self.spritesheet.get_image(64,0,TILESIZE, TILESIZE),
                                 self.spritesheet.get_image(96,0,TILESIZE, TILESIZE)
                                 ]
@@ -213,7 +244,7 @@ class Mob (Sprite):
         else:
             self.vel.y = 0
 
-    def update(self):
+    def update(self): #updates the attributes of mob
         self.animate()
         if self.game.player:
             self.chase(self.game.player)

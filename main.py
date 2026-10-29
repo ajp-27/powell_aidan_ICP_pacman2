@@ -58,7 +58,6 @@ class Game: #defining the class game
 
 
         self.map = Map(path.join(self.game_dir, map))
-
         
         try: 
             with open(self.game_save_file, "x", encoding="utf-8") as file:
@@ -83,9 +82,10 @@ class Game: #defining the class game
         self.all_walls = pg.sprite.Group()
         self.all_mobs = pg.sprite.Group()
         self.all_coins = pg.sprite.Group()
-        self.wall = Wall(self,2,0)
-        self.mob = Mob(self,5,0)
-        self.coin = Coin(self,2,0)
+        self.all_particles = pg.sprite.Group()
+        # self.wall = Wall(self,2,0)
+        # self.mob = Mob(self,5,0)
+        # self.coin = Coin(self,2,0)
         print(type(self.all_sprites))
         # self.all_sprites.add(self.player)
         # self.all_sprites.add(self.walls)
@@ -152,6 +152,6 @@ class Game: #defining the class game
 if __name__=="__main__":
     g= Game() #instantiated the Game Class (Called for the game class)
 
-while g.running:
+while g.running: #calls the new() and run()
     g.new() 
     g.run()   
