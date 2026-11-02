@@ -87,6 +87,9 @@ class player (Sprite): #creating the class player
         #     #self.vel.normalize()
         #     self.vel *= 0.7071
 
+    def jump(self):
+             pass
+
     def animate(self): #animates the sprite player
         # use the time element to get now
         now = pg.time.get_ticks()
@@ -114,6 +117,7 @@ class player (Sprite): #creating the class player
         self.animate()
         self.acc.x += self.vel.x * PLAYER_FRICTION
         self.acc.y += self.vel.y * PLAYER_FRICTION
+        self.vel += self.acc
         self.rect.center = self.pos
         self.pos += self.vel +0.5 * self.acc
         hits = pg.sprite.spritecollide(self, self.game.all_coins, True)
@@ -163,7 +167,6 @@ class Particle (Sprite): #defines the class particles
         print(str(len(self.game.all_particles)))
 
     def update(self): 
-        self.countdown.ticking()
 
         self.pos += self.vel * self.speed * self.game.dt
         if self.countdown.get_delta() > 2:
