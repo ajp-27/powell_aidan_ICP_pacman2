@@ -58,6 +58,7 @@ class player (Sprite): #creating the class player
         self.current_frame = 0
         self.jumping = False
         self.coins = 0
+        self.cofric = -0.1
         self.dir = "none"
 
         print("player initialized")
@@ -82,13 +83,25 @@ class player (Sprite): #creating the class player
         if keys[pg.K_UP] or keys[pg.K_w]:
             #self.vel.y = -PLAYER_SPEED
             self.acc.y = -PLAYER_SPEED
-        #check to see if player is moving diagonal 
-        # if self.vel.x != 0 and self.vel.y !=0:
-        #     #self.vel.normalize()
-        #     self.vel *= 0.7071
+        if keys[pg.K_UP]:
+            self.jump()
+        
 
     def jump(self):
-             pass
+        # works only when player is on a surface
+        self.rect.y += 2
+        hits = pg.sprite.spritecollide(self, self.game.all_walls, False)
+        self.rect.y -= 2
+        if hits and not self.jumping:
+            #self.game.jump_sound.play()
+            self.jumping = True
+            self.vel.y = -PLAYER_JUMP
+    
+    def is_jumping(self): #stops jumping when already moving vertically
+        if self.vel.y > 0:
+            hits = pg.sprite.spritecollide(self, self.game.all_walls, False)
+            if hits:
+                self.jumping = False
 
     def animate(self): #animates the sprite player
         # use the time element to get now
@@ -115,11 +128,12 @@ class player (Sprite): #creating the class player
         self.acc= vec(0,2)
         self.get_keys()
         self.animate()
-        self.acc.x += self.vel.x * PLAYER_FRICTION
-        self.acc.y += self.vel.y * PLAYER_FRICTION
+        self.is_jumping()
+        self.acc.x += self.vel.x * self.cofric
+        self.acc.y += self.vel.y * self.cofric
         self.vel += self.acc
         self.rect.center = self.pos
-        self.pos += self.vel +0.5 * self.acc
+        self.pos += self.vel* self.game.dt + 0.5 * self.acc
         hits = pg.sprite.spritecollide(self, self.game.all_coins, True)
         if hits:
             for i in range(25):
@@ -130,7 +144,8 @@ class player (Sprite): #creating the class player
         self.hit_rect.centerx = self.pos.x
         collide_with_walls(self,self.game.all_walls, 'x')
         self.hit_rect.centery = self.pos.y
-        collide_with_walls(self, self.game.all_walls, 'y')
+        if collide_with_walls(self, self.game.all_walls, 'y'):
+            self.jumping = False
         self.rect.center = self.hit_rect.center
 
 

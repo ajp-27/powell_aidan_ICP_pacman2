@@ -17,14 +17,14 @@
 
 #Output: Graphics, sound, haptics (vibration of the controller)
 
-#CSGO
-#GOALS: kill eveyone not on your team, last one standing, Plant or Defuse Bombs
 
-#RULES: 
+#GOALS: Reach checkpoints
 
-#FEEDBACK
+#RULES: gravity, acceleration, dying
 
-#FREEDOM
+#FEEDBACK: player resets to nearest checkpoint after dying, keys make it go up down right left, 
+
+#FREEDOM: hop onto other platforms, make it to the end
 
 ''''''
 
