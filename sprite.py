@@ -48,20 +48,21 @@ class player (Sprite): #creating the class player
         self.image = pg.Surface((TILESIZE, TILESIZE))
         self.image = self.spritesheet.get_image(0,0,TILESIZE,TILESIZE) 
         self.image.set_colorkey(BLACK)
-        self.image.fill(WHITE)
+        #self.image.fill(WHITE)
         self.rect = self.image.get_rect()
         self.hit_rect = PLAYER_HIT_RECT
         self.vel = vec(0,0)
-        self.acc = vec(0,0)
         self.pos = vec(x*TILESIZE,y*TILESIZE)
+        self.acc = vec(0,0)
+
         self.last_update = 0 
         self.current_frame = 0
-        self.jumping = False
+        self.dir = "none"
         self.coins = 0
         self.cofric = -0.1
-        self.dir = "none"
-
+        self.jumping = False
         print("player initialized")
+        print(self.pos)
 
     def get_keys(self):
         #reset d to zero
@@ -69,78 +70,94 @@ class player (Sprite): #creating the class player
         #change velocity based on which key is pressed
        
         #self.vel = vec(0,0)
-        self.dir ='none'
+        self.dir ="none"
         keys = pg.key.get_pressed()
         if keys[pg.K_LEFT] or keys[pg.K_a]:
             #self.vel.x = -PLAYER_SPEED
-            self.acc.x = -PLAYER_SPEED
+            self.acc.x = -PLAYER_ACC
         if keys[pg.K_RIGHT] or keys[pg.K_d]:
             #self.vel.x = PLAYER_SPEED
-            self.acc.x = PLAYER_SPEED
+            self.acc.x = PLAYER_ACC
         if keys[pg.K_DOWN] or keys[pg.K_s]:
             #self.vel.y = PLAYER_SPEED
-            self.acc.y = PLAYER_SPEED
+            self.acc.y = PLAYER_ACC
         if keys[pg.K_UP] or keys[pg.K_w]:
             #self.vel.y = -PLAYER_SPEED
-            self.acc.y = -PLAYER_SPEED
-        if keys[pg.K_UP]:
+            self.acc.y = -PLAYER_ACC
+        if keys[pg.K_SPACE]:
             self.jump()
-        
+        if self.vel.x != 0 and self.vel.y != 0:
+            self.vel *= 0.7071
 
+    def animate(self): #animates the sprite player
+            # use the time element to get now
+            now = pg.time.get_ticks()
+            if self.dir == "none":
+                if now - self.last_update > 350:
+                    self.last_update = now
+                    self.current_frame = (self.current_frame + 1) % len(self.idle_frames)
+                    bottom = self.rect.bottom
+                    self.image = self.idle_frames[self.current_frame]
+                    self.image.set_colorkey(BLACK)
+                    self.rect = self.image.get_rect()
+                    self.rect.bottom = bottom
+            elif self.dir == "right":
+                pass
+
+    def load_images(self): #moves from one image of player to another image of the player continuously
+            self.idle_frames = [self.spritesheet.get_image(0,0,TILESIZE, TILESIZE),
+                                self.spritesheet.get_image(TILESIZE,0,TILESIZE, TILESIZE)
+                                ]
+            self.run_frames =  [self.spritesheet.get_image(0,0,TILESIZE, TILESIZE),
+                                self.spritesheet.get_image(TILESIZE,0,TILESIZE, TILESIZE)
+            ]
+    
+        
     def jump(self):
         # works only when player is on a surface
         self.rect.y += 2
         hits = pg.sprite.spritecollide(self, self.game.all_walls, False)
         self.rect.y -= 2
         if hits and not self.jumping:
-            #self.game.jump_sound.play()
+            self.game.jump_sound.play()
             self.jumping = True
             self.vel.y = -PLAYER_JUMP
+        print("I'm jumping")
     
     def is_jumping(self): #stops jumping when already moving vertically
         if self.vel.y > 0:
             hits = pg.sprite.spritecollide(self, self.game.all_walls, False)
             if hits:
                 self.jumping = False
+        print("Not jumping")
 
-    def animate(self): #animates the sprite player
-        # use the time element to get now
-        now = pg.time.get_ticks()
-        if self.dir == "none":
-            if now - self.last_update > 350:
-                self.last_update = now
-                self.current_frame = (self.current_frame + 1) % len(self.idle_frames)
-                bottom = self.rect.bottom
-                self.image = self.idle_frames[self.current_frame]
-                self.image.set_colorkey(BLACK)
-                self.rect = self.image.get_rect()
-                self.rect.bottom = bottom
-        elif self.dir == "right":
-            pass
 
-    def load_images(self): #moves from one image of player to another image of the player continuously
-        self.idle_frames = [self.spritesheet.get_image(0,0,TILESIZE, TILESIZE),
-                            self.spritesheet.get_image(TILESIZE,0,TILESIZE, TILESIZE)
-                            ]
-        
-
+    
     def update(self): #updates all attributes of player
-        self.acc= vec(0,2)
-        self.get_keys()
         self.animate()
         self.is_jumping()
-        self.acc.x += self.vel.x * self.cofric
-        self.acc.y += self.vel.y * self.cofric
+        self.acc= vec(0,PLAYER_GRAV)
+        self.get_keys()
+        self.acc.x += self.vel.x * PLAYER_FRICTION
+        self.acc.y += self.vel.y * PLAYER_FRICTION
         self.vel += self.acc
-        self.rect.center = self.pos
-        self.pos += self.vel* self.game.dt + 0.5 * self.acc
+
+        if abs(self.vel.x) < 0.1:
+            self.vel.x = 0
+        if abs(self.vel.y) < 0.1:
+            self.vel.y = 0
+        # self.rect.center = self.pos
+        self.pos += self.vel + 0.5 * self.acc
+        # self.pos += self.vel * self.game.dt + 0.5 * self.acc
+        # self.pos += self.vel * self.game.dt
         hits = pg.sprite.spritecollide(self, self.game.all_coins, True)
         if hits:
             for i in range(25):
-                Particle(self.game, hits[0].pos.x, hits[0].pos.y)
+                p = Particle(self.game, hits[0].pos.x, hits[0].pos.y)
             self.coins += 1
             self.game.pickup_snd.play()
             self.game.score += 1
+            
         self.hit_rect.centerx = self.pos.x
         collide_with_walls(self,self.game.all_walls, 'x')
         self.hit_rect.centery = self.pos.y

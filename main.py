@@ -55,6 +55,7 @@ class Game: #defining the class game
 #soud 
         self.snd_dir = path.join(self.game_dir, 'audio')
         self.pickup_snd = pg.mixer.Sound(path.join(self.snd_dir, "pickup.wav"))
+        self.jump_sound = pg.mixer.Sound(path.join(self.snd_dir, 'Jump33.wav'))
 
 
         self.map = Map(path.join(self.game_dir, map))
