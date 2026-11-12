@@ -122,14 +122,15 @@ class player (Sprite): #creating the class player
             self.game.jump_sound.play()
             self.jumping = True
             self.vel.y = -PLAYER_JUMP
-        print("I'm jumping")
+            print('can jump')
     
     def is_jumping(self): #stops jumping when already moving vertically
         if self.vel.y > 0:
             hits = pg.sprite.spritecollide(self, self.game.all_walls, False)
             if hits:
                 self.jumping = False
-        print("Not jumping")
+                print ('cannot jump jumping')
+        
 
 
     
@@ -157,7 +158,7 @@ class player (Sprite): #creating the class player
             self.coins += 1
             self.game.pickup_snd.play()
             self.game.score += 1
-            
+
         self.hit_rect.centerx = self.pos.x
         collide_with_walls(self,self.game.all_walls, 'x')
         self.hit_rect.centery = self.pos.y
@@ -239,6 +240,7 @@ class Mob (Sprite): #defines mob sprite
         self.speed = 100
         self.vel = vec(0,0)
         self.pos = vec(x*TILESIZE, y*TILESIZE)
+        self.acc = vec(0,0)
         self.x = x*TILESIZE
         self.y = y*TILESIZE
         self.rect.x = self.x
@@ -246,6 +248,7 @@ class Mob (Sprite): #defines mob sprite
         self.last_update = 0 
         self.current_frame = 0
         self.hit_rect = MOB_HIT_RECT
+        self.cofric = -0.1
         self.dir = "none"
         
 
@@ -282,19 +285,30 @@ class Mob (Sprite): #defines mob sprite
         else:
             self.vel.x = 0
 
-        if self.pos.y < obj.pos.y:
-            self.vel.y = self.speed
-        elif self.pos.y > obj.pos.y:
-            self.vel.y = -self.speed
-        else:
-            self.vel.y = 0
+        # if self.pos.y < obj.pos.y:
+        #     self.vel.y = self.speed
+        # elif self.pos.y > obj.pos.y:
+        #     self.vel.y = -self.speed
+        # else:
+        #     self.vel.y = 0
 
     def update(self): #updates the attributes of mob
         self.animate()
+        self.acc = vec(0,PLAYER_GRAV)
         if self.game.player:
             self.chase(self.game.player)
-        self.rect.center = self.pos
-        self.pos += self.vel * self.game.dt
+        
+        self.acc.x += self.vel.x * PLAYER_FRICTION
+        self.acc.y += self.vel.y * PLAYER_FRICTION
+        self.vel += self.acc
+        if abs(self.vel.x) < 0.1:
+            self.vel.x = 0
+        if abs(self.vel.y) < 0.1:
+            self.vel.y = 0
+
+        # self.rect.center = self.pos
+        self.pos += self.vel + 0.5 * self.acc
+
         self.hit_rect.centerx = self.pos.x
         collide_with_walls(self, self.game.all_walls, 'x')
         self.hit_rect.centery = self.pos.y
