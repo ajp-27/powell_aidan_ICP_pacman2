@@ -141,7 +141,7 @@ class Game: #defining the class game
     def draw(self): #writes in text in the game
         #The order matters: The bottom layers of the game are the ones that need to be drawn first
         #Last(text) should be on top of everything
-        self.screen.fill(BGCOLOR)
+        self.screen.fill(CYAN)
         self.all_sprites.draw(self.screen)
         self.draw_text("Frames per second: " +str(floor(1/self.dt) ), 24, WHITE, WIDTH/2, HEIGHT/4)
         self.draw_text(f"Coins:{self.player.coins} ", 24, WHITE, WIDTH/2, HEIGHT/9)
