@@ -26,6 +26,8 @@ def collide_with_walls(sprite, group, dir): #defines what happens when player co
                 sprite.pos.x = hits[0].rect.right + sprite.hit_rect.width / 2
             sprite.vel.x = 0
             sprite.hit_rect.centerx = sprite.pos.x
+            return True
+        
     if dir =='y':
         hits = pg.sprite.spritecollide(sprite,group, False, collide_hit_rect)
         if hits: 
@@ -39,8 +41,8 @@ def collide_with_walls(sprite, group, dir): #defines what happens when player co
             sprite.hit_rect.centery = sprite.pos.y
            
 class player (Sprite): #creating the class player
-    def __init__(self, game, x,y):
-        self.groups = game.all_sprites
+    def __init__(self, game, x,y): #creating properties/attributes for the class
+        self.groups = game.all_sprites 
         Sprite.__init__(self, self.groups)
         self.game = game
         self.spritesheet = Spritesheet(path.join(self.game.img_dir, "sprite_sheet.png"))
@@ -130,13 +132,11 @@ class player (Sprite): #creating the class player
             hits = pg.sprite.spritecollide(self, self.game.all_walls, False)
             if hits:
                 self.jumping = False
-                print ('False')
                 
-        
-
+                
 
     
-    def update(self): #updates all attributes of player
+    def update(self): #updates all attributes to the player
         self.animate()
         self.is_jumping()
         self.acc= vec(0,PLAYER_GRAV)
@@ -250,6 +250,7 @@ class Mob (Sprite): #defines mob sprite
         self.hit_rect = MOB_HIT_RECT
         self.cofric = -0.1
         self.dir = "none"
+        self.hit_wall = False
 
     def load_images(self):
         self.idle_frames = [self.spritesheet.get_image(64,0,TILESIZE, TILESIZE),
@@ -293,19 +294,30 @@ class Mob (Sprite): #defines mob sprite
     #     else:
     #         self.vel.y = 0
 
-    def behavior(self):
-        self.vel.x = self.speed
-        if self.speed == 10:
+    def behavior(self): #sets up the path mobs have to follow
+        self.vel.x = self.speed 
+        if self.speed == 2:
             self.dir = "right"
         else:
             self.dir = "left"
+
+    # def behavior(self):
+    #     self.vel.x = self.speed
+    #     hits = pg.sprite.spritecollide(self, self.game.all_walls, False)
+    #     if hits and not self.hit_wall and self.speed == self.speed:
+    #         self.hit_wall = True
+    #         self.speed *= -1
+    #         print("can flip")
+    #     else:
+    #         self.hit_wall = False
+    #         print("cannot flip")
+                
 
 
     def update(self): #updates the attributes of mob
         self.animate()
         self.acc = vec(0,PLAYER_GRAV)
         self.behavior()
-
         
         self.acc.x += self.vel.x * PLAYER_FRICTION
         self.acc.y += self.vel.y * PLAYER_FRICTION
@@ -316,7 +328,7 @@ class Mob (Sprite): #defines mob sprite
 
         self.hit_rect.centerx = self.pos.x
         if collide_with_walls(self,self.game.all_walls, 'x'):
-            self.speed *= -1
+            self.speed *=-1
         self.hit_rect.centery = self.pos.y
         collide_with_walls(self, self.game.all_walls, 'y')
         
