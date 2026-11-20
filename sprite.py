@@ -136,7 +136,7 @@ class player (Sprite): #creating the class player
                 
 
     
-    def update(self): #updates all attributes to the player
+    def update(self): #makes changes to the player when running the code
         self.animate()
         self.is_jumping()
         self.acc= vec(0,PLAYER_GRAV)
@@ -170,7 +170,7 @@ class player (Sprite): #creating the class player
 
 
 class Wall (Sprite): #defines class wall
-    def __init__(self,game,x,y):
+    def __init__(self,game,x,y): #attributes to the wall
         self.groups = game.all_sprites, game.all_walls
         Sprite.__init__(self, self.groups)
         self.game = game
@@ -185,7 +185,7 @@ class Wall (Sprite): #defines class wall
         print("wall initialized")
 
 class Particle (Sprite): #defines the class particles
-    def __init__(self,game,x,y):
+    def __init__(self,game,x,y): #adds attributes to the particle
         self.groups = game.all_sprites, game.all_particles
         Sprite.__init__(self, self.groups)
         self.game = game
@@ -201,7 +201,7 @@ class Particle (Sprite): #defines the class particles
         print(self.pos.y)
         print(str(len(self.game.all_particles)))
 
-    def update(self): 
+    def update(self): #makes changes to the wall when running the code
 
         self.pos += self.vel * self.speed * self.game.dt
         if self.countdown.get_delta() > 2:
@@ -212,7 +212,7 @@ class Particle (Sprite): #defines the class particles
         self.rect.y = self.pos.y
 
 class Coin(Sprite): #defines coin collectable
-    def __init__(self, game, x, y):
+    def __init__(self, game, x, y):#adds attributes to the coin
         self.groups = game.all_sprites, game.all_coins
         Sprite.__init__(self, self.groups)
         self.game = game
@@ -227,7 +227,7 @@ class Coin(Sprite): #defines coin collectable
         self.rect.center = self.pos
         
 class Mob (Sprite): #defines mob sprite
-    def __init__(self,game,x,y):
+    def __init__(self,game,x,y): #adds attributes to the mob
         self.groups = game.all_sprites, game.all_mobs
         Sprite.__init__(self, self.groups)
         self.game = game
@@ -314,7 +314,7 @@ class Mob (Sprite): #defines mob sprite
                 
 
 
-    def update(self): #updates the attributes of mob
+    def update(self): #makes changes to the mob when running the code
         self.animate()
         self.acc = vec(0,PLAYER_GRAV)
         self.behavior()

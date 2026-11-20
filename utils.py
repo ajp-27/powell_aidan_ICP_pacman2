@@ -3,7 +3,7 @@ from settings import *
 from math import floor
 
 class Map:
-    def __init__(self, filename):
+    def __init__(self, filename): #initializes the map on screen
         self.data = []
         with open(filename, 'rt') as f:
             for line in f:

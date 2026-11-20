@@ -35,8 +35,8 @@ from sprite import*       #imports code from sprite and utils into main
 from utils import * 
 
 class Game: #defining the class game
-    def __init__(self): #runs first and are the processors of the class game
-          pg.init()
+    def __init__(self): #runs first and are the processors of the class game 
+          pg.init() 
           pg.mixer.init()
           self.screen = pg.display.set_mode((WIDTH , HEIGHT))
           print("game initialize...")
@@ -103,8 +103,8 @@ class Game: #defining the class game
             for col, tile, in enumerate(tiles):
                 if tile == 'P':
                     self.player = player(self,col, row)
-        pg.mixer.music.load(path.join(self.snd_dir, "audio_Juhani Junkala_Stage 1.ogg"))
-        pg.mixer.music.play(loops=-1)
+       # pg.mixer.music.load(path.join(self.snd_dir, "audio_Juhani Junkala_Stage 1.ogg"))
+        #pg.mixer.music.play(loops=-1)
 
     def run(self): #CORE of the game loop 
         self.playing= True
